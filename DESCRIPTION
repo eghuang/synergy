@@ -1,11 +1,29 @@
 Package: synergy
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
+Title: Tools for Synergy/Antagonism Modeling
+Version: 0.0.0.9000
+Authors@R: as.person(c(
+    "Edward Greg Huang <eghuang@berkeley.edu> [aut, cre]", 
+    "Dae Woo Ham <> [aut]",
+    "Yimin Lin" <> [aut]",
+    "Mark Ebert <> [aut]",
+    "Rainer K. Sachs <sachs@math.berkeley.edu> [aut, cre, cph]"
+  ))
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+License: GPL-3
+URL: https://github.com/eghuang/synergy
+BugReports: https://github.com/eghuang/synergy/issues
 Encoding: UTF-8
 LazyData: true
+Depends:
+    R (>= 3.5.2)
+Imports:
+    deSolve (>= 1.21),
+    minpack.lm (>= 1.2-1), 
+    mvtnorm (>= 1.0-8),
+    dplyr (>= 0.7.8)
+Suggests:
+    testthat (>= 2.0.1)
+    Hmisc (>= 4.2-0)
+RoxygenNote: 5.0.1
