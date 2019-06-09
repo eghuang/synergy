@@ -3,10 +3,10 @@ Type: Package
 Title: Tools for Synergy/Antagonism Modeling
 Version: 0.0.0.9000
 Authors@R: as.person(c(
-    "Edward Greg Huang <eghuang@berkeley.edu> [aut, cre]", 
-    "Dae Woo Ham <> [aut]",
-    "Yimin Lin" <> [aut]",
-    "Mark Ebert <> [aut]",
+    "Edward Greg Huang <eghuang@berkeley.edu> [aut]", 
+    "Dae Woo Ham [aut]",
+    "Yimin Lin [aut]",
+    "Mark Ebert [aut]",
     "Rainer K. Sachs <sachs@math.berkeley.edu> [aut, cre, cph]"
   ))
 Description: More about what it does (maybe more than one line)
@@ -24,6 +24,6 @@ Imports:
     mvtnorm (>= 1.0-8),
     dplyr (>= 0.7.8)
 Suggests:
-    testthat (>= 2.0.1)
+    testthat (>= 2.0.1),
     Hmisc (>= 4.2-0)
-RoxygenNote: 5.0.1
+RoxygenNote: 6.1.1
