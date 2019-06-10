@@ -1,6 +1,6 @@
 #' @title Applies IEA to get a baseline no-synergy/antagonism mixture DER.
 #'
-#' @description
+#' @description Need to rewrite and generalize.
 #'
 #' @param dose Numeric vector corresponding to the sum dose in cGy.
 #' @param LET Numeric vector of all LET values, must be length n.

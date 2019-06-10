@@ -1,27 +1,7 @@
-# Copyright:    (C) 2017-2018 Sachs Undergraduate Research Apprentice Program
-#               This program and its accompanying materials are distributed
-#               under the terms of the GNU General Public License v3.
-# Filename:     monteCarlo.R
-# Purpose:      Concerns radiogenic mouse Harderian gland tumorigenesis.
-#               Contains the code to run Monte Carlo sampling and generate
-#               confidence intervals for dose-effect relationship models. It is
-#               part of the source code for the Chang 2019 HG project.
-# Contact:      Rainer K. Sachs
-# Website:      https://github.com/rainersachs/mouseHG_Chang_2019plus
-# Mod history:  04 Apr 2019
-# Details:      See data_info.R for further licensing, attribution,
-#               references, and abbreviation information.
-
-# source("synergy.R") # Load in data and models.
-
-# library(mvtnorm) # Random sampling.
-
-#======================= MONTE CARLO SIMULATION FUNCTION ======================#
-
 #' @title Runs the Monte Carlo method on a baseline no-synergy/antagonism
 #'        mixture DER.
 #'
-#' @description
+#' @description Need to rewrite and generalize.
 #'
 #' @param n Numeric integer of the number of samples to be drawn.
 #' @param dose Numeric vector of all total dose values to be evaluated.

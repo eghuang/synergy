@@ -28,10 +28,9 @@ calculate_SEA <- function(dose, LET, ratios, DER, n = NULL) {
     stop("Length of arguments do not match.")
   } else if (sum(ratios) != 1) {
     stop("Sum of ratios do not add up to one.")
+  } else if (!check_DER(DER)) {
+    stop("DER has invalid properties.")
   }
-  # else if (!check_DER(DER)) {
-  # stop("DER has invalid properties".)
-  # }
   #  End error handling
   total <- 0
   i <- 0
