@@ -103,7 +103,7 @@ summary(low_LET_model, correlation = TRUE)
 low_LET_model_coef <- coef(low_LET_model) # Calibrated central values of the parameter.
 
 # Calibrated Low LET model. Use L = 0, but maybe later will use small L > 0.
-calibrated_low_LET_der <- function(dose, LET, alph_low = low_LET_model_coef[1]) {
+calibrated_low_LET_der <- function(dose, LET, alph_low = low_LET_model_coef) {
   return(1 - exp( - alph_low * dose))
 }
 
