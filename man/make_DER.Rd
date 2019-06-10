@@ -7,6 +7,8 @@
 make_DER(data, HZE, NTE, phi = 2000, y_0 = 0.04604)
 }
 \arguments{
+\item{data}{Data.frame of single ion data.}
+
 \item{HZE}{Boolean for presence of HZE ions}
 
 \item{NTE}{Boolean for presence of non-targeted effects}

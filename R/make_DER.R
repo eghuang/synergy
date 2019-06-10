@@ -4,6 +4,7 @@
 #'              with parameters dose and LET. The ion may be a low-LET or HZE
 #'              ion and non-targeted effects may be specified.
 #'
+#' @param data Data.frame of single ion data.
 #' @param phi Numeric constant
 #' @param y_0 Numeric constant corresponding to background effect
 #' @param HZE Boolean for presence of HZE ions

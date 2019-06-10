@@ -11,13 +11,13 @@ Authors@R: as.person(c(
   ))
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
-License: GPL-3
+License: GPL-3 + file LICENSE
 URL: https://github.com/eghuang/synergy
 BugReports: https://github.com/eghuang/synergy/issues
 Encoding: UTF-8
 LazyData: true
 Depends:
-    R (>= 3.5.2)
+    R (>= 3.5.0)
 Imports:
     deSolve (>= 1.21),
     minpack.lm (>= 1.2-1), 

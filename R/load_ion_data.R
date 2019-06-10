@@ -51,7 +51,7 @@
 
 #' @title Loads CSV dataset as a data.frame, dropping zero entries.
 #'
-#' @description
+#' @description CSV should have a numeric "dose" column.
 #'
 #' @param filename String of the path of the CSV file
 #'
@@ -63,7 +63,7 @@
 #' # Data used is that in 16Chang plus later NSRL data scored before 3/31/2019.
 #' ion_data <- load_ion_data("one_ion.csv")
 #' mix_data <- load_ion_data(read.csv("mix_ion.csv"))
-#' The two .csv files contain all input HG data except Y_0
+#' # The two .csv files contain all input HG data except Y_0
 #' @export
 
 load_ion_data <- function(filename) {

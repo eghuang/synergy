@@ -35,7 +35,8 @@ Tested for the two examples below. General correctness is
 ##=================== Cross validation ====================#
 # Seperate Data into 8 blocks, i.e. test/training sets:
 data_len <- 1:length(HZE_data)
-O_350 <- dplyr::select(filter(HZE_data, Beam == "O"), data_len) #RKS added 3 oxygen points 5/17/2019)
+O_350 <- dplyr::select(filter(HZE_data, Beam == "O"), data_len)
+#RKS added 3 oxygen points 5/17/2019)
 Ne_670 <- dplyr::select(filter(HZE_data, Beam == "Ne"), data_len)
 Si_260 <- dplyr::select(filter(HZE_data, Beam == "Si"), data_len)
 Ti_1000 <- dplyr::select(filter(HZE_data, Beam == "Ti"), data_len)

@@ -22,5 +22,5 @@ Data.frame of the selected data file.
 # Data used is that in 16Chang plus later NSRL data scored before 3/31/2019.
 ion_data <- load_ion_data("one_ion.csv")
 mix_data <- load_ion_data(read.csv("mix_ion.csv"))
-The two .csv files contain all input HG data except Y_0
+# The two .csv files contain all input HG data except Y_0
 }
