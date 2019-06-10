@@ -4,7 +4,7 @@ Title: Tools for Synergy/Antagonism Modeling
 Version: 0.0.0.9000
 Authors@R: as.person(c(
     "Edward Greg Huang <eghuang@berkeley.edu> [aut]", 
-    "Dae Woo Ham [aut]",
+    "Dae Woong Ham [aut]",
     "Yimin Lin [aut]",
     "Mark Ebert [aut]",
     "Rainer K. Sachs <sachs@math.berkeley.edu> [aut, cre, cph]"
