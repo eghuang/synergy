@@ -2,6 +2,7 @@
 
 export(calculate_IEA)
 export(calculate_SEA)
+export(check_DER)
 export(cross_val)
 export(load_ion_data)
 export(make_DER)

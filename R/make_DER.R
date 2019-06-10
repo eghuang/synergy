@@ -18,6 +18,7 @@
 #'
 #' @examples
 #'
+#' @author Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export
 
 make_DER <- function(data, HZE, NTE, phi = 2000, y_0 = 0.04604) {

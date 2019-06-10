@@ -40,4 +40,8 @@ Corresponding elements of ratios, LET should be associated with the
 ratios <- c(1/2, 1/2)
 LET_vals <- c(195, 70)
 run_monte_carlo(0:100, LET_vals, ratios)
+
+}
+\author{
+Yimin Lin, Edward Greg Huang <eghuang@berkeley.edu>
 }

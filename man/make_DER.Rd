@@ -32,3 +32,6 @@ data must have a numeric column "dose" and a numeric weight column
 \examples{
 
 }
+\author{
+Edward Greg Huang <eghuang@berkeley.edu>
+}

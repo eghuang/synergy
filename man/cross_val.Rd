@@ -17,12 +17,10 @@ cross_val(ions, model, prev, w)
 \item{w}{Numeric vector of experimental weights.}
 }
 \value{
-Numeric vector representing the estimated Harderian Gland
-        prevalence from a SEA mixture DER constructed from the given DER
-        parameters. RKS 5/17/2019. Again: why SEA?
+Numeric weighted mean errors.
 }
 \description{
-
+Not well tested.
 }
 \details{
 Weight vector elements should correspond to dataframe element order.
@@ -51,4 +49,7 @@ actual_prev <- HZE_data$Prev
 NTE_cv <- cross_val(set_list,"NTE", HZE_data$Prev, HZE_data$NWeight)
 TE_cv <- cross_val(set_list, "TE", HZE_data$Prev, HZE_data$NWeight)
 
+}
+\author{
+Edward Greg Huang <eghuang@berkeley.edu>
 }

@@ -1,7 +1,7 @@
 #' @title Applies cross validation to a mixture of ions with respect to
 #'        a synergy theory.
 #'
-#' @description
+#' @description Not well tested.
 #'
 #' @param ions List of dataframes corresponding to ion.
 #' @param model String, "NTE" or "TE" for non-targeted or targeted effects.
@@ -11,9 +11,7 @@
 #' @details Weight vector elements should correspond to dataframe element order.
 #'          i.e. w[n] = ions[length(ions[:, 1]) / n][length(ions[:, 1]) % n]
 #'
-#' @return Numeric vector representing the estimated Harderian Gland
-#'         prevalence from a SEA mixture DER constructed from the given DER
-#'         parameters. RKS 5/17/2019. Again: why SEA?
+#' @return Numeric weighted mean errors.
 #'
 #' @details Tested for the two examples below. General correctness is
 #'          unverified and should be treated at some future data.
@@ -38,6 +36,7 @@
 #' NTE_cv <- cross_val(set_list,"NTE", HZE_data$Prev, HZE_data$NWeight)
 #' TE_cv <- cross_val(set_list, "TE", HZE_data$Prev, HZE_data$NWeight)
 #'
+#' @author Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export
 
 cross_val <- function(ions, model, prev, w) {

@@ -10,7 +10,7 @@
 #               customized source code for the Chang 2019 HG project.
 # Contact:      Rainer K. Sachs
 # Website:      https://github.com/rainersachs/mouseHG_Chang_2019plus
-# Mod history:  04 Apr 2019
+# Mod history:  09 Jun 2019
 # Attribution:  This R script was developed at UC Berkeley. Written by Dae Woong
 #               Ham Summer 2017. Additions, corrections, changes, quality
 #               control, reorganization by Edward Huang, Yimin Lin, Mark Ebert,
@@ -51,11 +51,12 @@
 
 #' @title Loads CSV dataset as a data.frame, dropping zero entries.
 #'
-#' @description CSV should have a numeric "dose" column.
+#' @description This is meant to handle single-ion CSV datasets.
 #'
-#' @param filename String of the path of the CSV file
+#' @param filename String of the CSV filename.
 #'
-#' @details
+#' @details The filename includes the path from the current working directory.
+#'          CSV should have a numeric "dose" column.
 #'
 #' @return Data.frame of the selected data file.
 #'
@@ -64,6 +65,8 @@
 #' ion_data <- load_ion_data("one_ion.csv")
 #' mix_data <- load_ion_data(read.csv("mix_ion.csv"))
 #' # The two .csv files contain all input HG data except Y_0
+#'
+#' @author Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export
 
 load_ion_data <- function(filename) {

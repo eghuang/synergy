@@ -43,4 +43,8 @@ Corresponding elements of ratios, LET should be associated with the
 \examples{
 calculate_IEA(.01 * 0:40, c(70, 195), c(1/2, 1/2))
 calculate_IEA(.01 * 0:70, c(.4, 195), c(4/7, 3/7), model = "TE")
+
+}
+\author{
+Dae Woong Ham, Edward Greg Huang <eghuang@berkeley.edu>
 }

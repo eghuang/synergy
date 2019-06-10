@@ -4,7 +4,7 @@
 \alias{calculate_SEA}
 \title{Applies Simple Effect Additivity to get a baseline mixture DER.}
 \usage{
-calculate_SEA(dose, LET, ratios, lowLET = FALSE, n = NULL)
+calculate_SEA(dose, LET, ratios, DER, n = NULL)
 }
 \arguments{
 \item{dose}{Numeric vector corresponding to the sum dose in cGy.}
@@ -13,7 +13,7 @@ calculate_SEA(dose, LET, ratios, lowLET = FALSE, n = NULL)
 
 \item{ratios}{Numeric vector of all dose ratios, must be length n.}
 
-\item{lowLET}{Boolean of whether a low LET DER should be included in the mixture DER.}
+\item{DER}{DER function taking dose and LET as arguments.}
 
 \item{n}{Number of DERs, optional argument used to check parameter validity.}
 }
@@ -33,4 +33,8 @@ Corresponding elements of ratios, LET should be associated with the
 calculate_SEA(.01 * 0:40, c(70, 195), c(1/2, 1/2), n = 2)
 calculate_SEA(.01 * 0:70, c(0.4, 195), c(4/7, 3/7))
 # RKS please explain n=NULL and lowLET = false a bit more. Also, what happens if we add more models in the cross validation?
+
+}
+\author{
+Edward Greg Huang <eghuang@berkeley.edu>
 }
