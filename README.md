@@ -2,7 +2,7 @@
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)  
 
-CRAN package prototype for synergy theory methods. Previously used for analyzing ionizing radiation tumorigenesis and chromosome abberations outside low-earth orbit, but may be applicable to other uses. The methods found in this repository are described in [Huang et al., (2019)](https://link.springer.com/article/10.1007%2Fs00411-018-00774-x) and [Ham et al., (2018)](https://www.rrjournal.org/doi/full/10.1667/RR14948.1).
+CRAN package prototype for synergy theory methods. Previously used for analyzing ionizing radiation tumorigenesis and chromosome aberrations outside low-earth orbit, but may be applicable to other uses. The methods found in this repository are described in [Huang et al., (2019)](https://link.springer.com/article/10.1007%2Fs00411-018-00774-x) and [Ham et al., (2018)](https://www.rrjournal.org/doi/full/10.1667/RR14948.1).
 
 ## Repository Contents
 
