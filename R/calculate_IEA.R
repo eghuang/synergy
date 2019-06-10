@@ -1,4 +1,6 @@
-#' @description Applies IEA to get a baseline no-synergy/antagonism mixture DER.
+#' @title Applies IEA to get a baseline no-synergy/antagonism mixture DER.
+#'
+#' @description
 #'
 #' @param dose Numeric vector corresponding to the sum dose in cGy.
 #' @param LET Numeric vector of all LET values, must be length n.
@@ -18,10 +20,11 @@
 #'         one-ion DERs parameters.
 #'
 #' @examples
-#' calculate_id(.01 * 0:40, c(70, 195), c(1/2, 1/2))
-#' calculate_id(.01 * 0:70, c(.4, 195), c(4/7, 3/7), model = "TE")
+#' calculate_IEA(.01 * 0:40, c(70, 195), c(1/2, 1/2))
+#' calculate_IEA(.01 * 0:70, c(.4, 195), c(4/7, 3/7), model = "TE")
+#' @export
 
-calculate_id <- function(dose, LET, ratios, model = "NTE",
+calculate_IEA <- function(dose, LET, ratios, model = "NTE",
                          coef = list(NTE = HZE_nte_model_coef,
                                      TE = HZE_te_model_coef,
                                      lowLET = low_LET_model_coef),

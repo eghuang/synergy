@@ -18,8 +18,10 @@
 
 #======================= MONTE CARLO SIMULATION FUNCTION ======================#
 
-#' @description Runs the Monte Carlo method on a baseline no-synergy/antagonism
-#'              mixture DER.
+#' @title Runs the Monte Carlo method on a baseline no-synergy/antagonism
+#'        mixture DER.
+#'
+#' @description
 #'
 #' @param n Numeric integer of the number of samples to be drawn.
 #' @param dose Numeric vector of all total dose values to be evaluated.
@@ -65,9 +67,10 @@ simulate_monte_carlo <- function(n = 200, dose, LET, ratios, model = "NTE",
 #========================= MONTE CARLO HIDDEN FUNCTIONS =======================#
 
 #================== SAMPLING ===================#
-
-#' @description Generates mixture no-synergy/antagonism DER samples with
-#'              parameters drawn from a Gaussian distribution.
+#' @title Generates mixture no-synergy/antagonism DER samples with
+#'        parameters drawn from a Gaussian distribution.
+#'
+#' @description
 #'
 #' @param n Numeric integer of the number of samples to be drawn.
 #' @param dose Numeric vector of all total dose values to be evaluated.
@@ -80,7 +83,6 @@ simulate_monte_carlo <- function(n = 200, dose, LET, ratios, model = "NTE",
 #' @param low_model The input low LET model.
 #'
 #' @return Numeric vector of sample mixture baseline DERs evaluated at the given doses.
-#' @export
 
 .generate_samples <- function(n, dose, LET, ratios, model, vcov,
                               nte_model = HZE_nte_model,
@@ -103,12 +105,12 @@ simulate_monte_carlo <- function(n = 200, dose, LET, ratios, model = "NTE",
   curve_list <- list(0)
   for (i in 1:n) {
     if (model == "NTE") {
-      curve_list[[i]] <- calculate_id(dose, LET, ratios,
+      curve_list[[i]] <- calculate_IEA(dose, LET, ratios,
                                       coef = list(NTE = samples[i, ],
                                       lowLET = low_LET_samples[i]),
                                       model = "NTE")
     } else if (model == "TE") {
-      curve_list[[i]] <- calculate_id(dose, LET, ratios,
+      curve_list[[i]] <- calculate_IEA(dose, LET, ratios,
                                       coef = list(TE = samples[i, ],
                                       lowLET = low_LET_samples[i]),
                                       model = "TE")
@@ -120,9 +122,10 @@ simulate_monte_carlo <- function(n = 200, dose, LET, ratios, model = "NTE",
 }
 
 #============= INTERVAL CONSTRUCTION ===========#
-
-#' @description Generates confidence intervals for mixture baeline DER samples
+#' @title Generates confidence intervals for mixture baeline DER samples
 #'              at a dose.
+#'
+#' @description
 #'
 #' @param n Numeric integer of the number of samples to be drawn.
 #' @param dose_index Numeric integer of doses
@@ -131,7 +134,6 @@ simulate_monte_carlo <- function(n = 200, dose, LET, ratios, model = "NTE",
 #'
 #' @return Numeric length-two vector of an upper and lower bound for the
 #'         confidence interval of a dose.
-#' @export
 
 .generate_ci <- function(n, dose_index, sample_curves, interval_length) {
   # For each sample curve, evalute them at input dose, and sort.

@@ -39,8 +39,8 @@ phi <- 2000 # even larger phi should give the same final results,
 
 #=============== Subsets of 1-ion dataframe =================#
 # (HZE = high charge and energy;
-HZE_data <- select(filter(ion_data, Z > 3), 1:length(ion_data)) # Includes 1-ion data iff Z > 3
-low_LET_data <- select(filter(ion_data, Z < 4), 1:length(ion_data))  # Swift light ions: here protons and alpha particles.
+HZE_data <- dplyr::select(filter(ion_data, Z > 3), 1:length(ion_data)) # Includes 1-ion data iff Z > 3
+low_LET_data <- dplyr::select(filter(ion_data, Z < 4), 1:length(ion_data))  # Swift light ions: here protons and alpha particles.
 
 #=============== HZE/NTE MODEL =================#
 #  NTE = non-targeted effects are included (in addition to TE)
@@ -121,73 +121,20 @@ print(info_crit_table)
 ##=================== Cross validation ====================#
 # Seperate Data into 8 blocks, i.e. test/training sets:
 data_len <- 1:length(HZE_data)
-O_350 <- select(filter(HZE_data, Beam == "O"), data_len) #RKS added 3 oxygen points 5/17/2019)
-Ne_670 <- select(filter(HZE_data, Beam == "Ne"), data_len)
-Si_260 <- select(filter(HZE_data, Beam == "Si"), data_len)
-Ti_1000 <- select(filter(HZE_data, Beam == "Ti"), data_len)
-Fe_600 <- select(filter(HZE_data, LET == 193), data_len)
-Fe_350 <- select(filter(HZE_data, LET == 253), data_len)
-Nb_600 <- select(filter(HZE_data, Beam == "Nb"), data_len)
-La_593 <- select(filter(HZE_data, Beam == "La"), data_len)
+O_350 <- dplyr::select(filter(HZE_data, Beam == "O"), data_len) #RKS added 3 oxygen points 5/17/2019)
+Ne_670 <- dplyr::select(filter(HZE_data, Beam == "Ne"), data_len)
+Si_260 <- dplyr::select(filter(HZE_data, Beam == "Si"), data_len)
+Ti_1000 <- dplyr::select(filter(HZE_data, Beam == "Ti"), data_len)
+Fe_600 <- dplyr::select(filter(HZE_data, LET == 193), data_len)
+Fe_350 <- dplyr::select(filter(HZE_data, LET == 253), data_len)
+Nb_600 <- dplyr::select(filter(HZE_data, Beam == "Nb"), data_len)
+La_593 <- dplyr::select(filter(HZE_data, Beam == "La"), data_len)
 set_list <- list(O_350, Ne_670, Si_260, Ti_1000,
                  Fe_600, Fe_350, Nb_600, La_593)
 actual_prev <- HZE_data$Prev
 
-#' @description Applies cross validation to a mixture of ions with respect to
-#'              a synergy theory.
-#'
-#' @param ions List of dataframes corresponding to ion.
-#' @param model String, "NTE" or "TE" for non-targeted or targeted effects.
-#' @param prev Numeric vector of observed prevalence values.
-#' @param w Numeric vector of experimental weights.
-#'
-#' @details Weight vector elements should correspond to dataframe element order.
-#'          i.e. w[n] = ions[length(ions[:, 1]) / n][length(ions[:, 1]) % n]
-#'
-#' @return Numeric vector representing the estimated Harderian Gland
-#'         prevalence from a SEA mixture DER constructed from the given DER
-#'         parameters. RKS 5/17/2019. Again: why SEA?
-#'
-#' @details Tested for the two examples below. General correctness is
-#'          unverified and should be treated at some future data.
-#'
-#' @examples
-#' NTE_cv <- cross_val(set_list,"NTE", HZE_data$Prev, HZE_data$NWeight)
-#' TE_cv <- cross_val(set_list, "TE", HZE_data$Prev, HZE_data$NWeight)
-
-cross_val <- function(ions, model, prev, w) {
-  theoretical <- vector()
-  for (i in 1:length(ions)) {
-    test <- ions[[i]]
-    excluded_list <- ions[-i]
-    train <- excluded_list[[1]]
-    for (j in 2:length(excluded_list)) {
-      train <- rbind(train, excluded_list[[j]])
-    }
-    if (model == "NTE") {
-      f <- Prev ~ Y_0 + (1 - exp ( -(aa1 * LET * dose * exp( -aa2 * LET)
-                                     + (1 - exp( - phi * dose)) * kk1)))
-      s <- list(aa1 = .00009, aa2 = .001, kk1 = .06)
-    } else {
-      f <- Prev ~ Y_0 + (1 - exp ( -(aate1 * LET * dose * exp( -aate2 * LET))))
-      s <- list(aate1 = .00009, aate2 = .01)
-    }
-    m <- nls(f, data = train, weights = NWeight, start = s)
-    pred <- predict(m, test)
-    theoretical <- c(theoretical, pred)
-  }
-  errors <- (theoretical - prev) ^ 2
-  return(weighted.mean(errors, w))
-}
-
-NTE_cv <- cross_val(set_list,"NTE", HZE_data$Prev, HZE_data$NWeight)
-TE_cv <- cross_val(set_list, "TE", HZE_data$Prev, HZE_data$NWeight)
-
-CV_table <- cbind(NTE_cv, TE_cv)
-print(CV_table)
-
 #============================ DEVELOPER FUNCTIONS =============================#
-test_runtime <- function(f, ...) { # Naive runtime check
+.test_runtime <- function(f, ...) { # Naive runtime check
   start_time <- Sys.time()
   f(...)
   Sys.time() - start_time

@@ -49,7 +49,9 @@
 #   "TE"      = Targeted effects
 #   "cGy"     = Centigray
 
-#' @description Loads CSV dataset as a
+#' @title Loads CSV dataset as a data.frame, dropping zero entries.
+#'
+#' @description
 #'
 #' @param filename String of the path of the CSV file
 #'
