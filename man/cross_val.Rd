@@ -32,6 +32,21 @@ Tested for the two examples below. General correctness is
          unverified and should be treated at some future data.
 }
 \examples{
+##=================== Cross validation ====================#
+# Seperate Data into 8 blocks, i.e. test/training sets:
+data_len <- 1:length(HZE_data)
+O_350 <- dplyr::select(filter(HZE_data, Beam == "O"), data_len) #RKS added 3 oxygen points 5/17/2019)
+Ne_670 <- dplyr::select(filter(HZE_data, Beam == "Ne"), data_len)
+Si_260 <- dplyr::select(filter(HZE_data, Beam == "Si"), data_len)
+Ti_1000 <- dplyr::select(filter(HZE_data, Beam == "Ti"), data_len)
+Fe_600 <- dplyr::select(filter(HZE_data, LET == 193), data_len)
+Fe_350 <- dplyr::select(filter(HZE_data, LET == 253), data_len)
+Nb_600 <- dplyr::select(filter(HZE_data, Beam == "Nb"), data_len)
+La_593 <- dplyr::select(filter(HZE_data, Beam == "La"), data_len)
+set_list <- list(O_350, Ne_670, Si_260, Ti_1000,
+                 Fe_600, Fe_350, Nb_600, La_593)
+actual_prev <- HZE_data$Prev
+
 NTE_cv <- cross_val(set_list,"NTE", HZE_data$Prev, HZE_data$NWeight)
 TE_cv <- cross_val(set_list, "TE", HZE_data$Prev, HZE_data$NWeight)
 
