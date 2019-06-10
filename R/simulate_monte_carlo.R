@@ -40,6 +40,7 @@
 #' ratios <- c(1/2, 1/2)
 #' LET_vals <- c(195, 70)
 #' simulate_monte_carlo(0:100, LET_vals, ratios)
+#' @export
 
 simulate_monte_carlo <- function(n = 200, dose, LET, ratios, model = "NTE",
                                  vcov = TRUE, interval_length = 0.95,
@@ -79,6 +80,7 @@ simulate_monte_carlo <- function(n = 200, dose, LET, ratios, model = "NTE",
 #' @param low_model The input low LET model.
 #'
 #' @return Numeric vector of sample mixture baseline DERs evaluated at the given doses.
+#' @export
 
 .generate_samples <- function(n, dose, LET, ratios, model, vcov,
                               nte_model = HZE_nte_model,
@@ -129,6 +131,7 @@ simulate_monte_carlo <- function(n = 200, dose, LET, ratios, model = "NTE",
 #'
 #' @return Numeric length-two vector of an upper and lower bound for the
 #'         confidence interval of a dose.
+#' @export
 
 .generate_ci <- function(n, dose_index, sample_curves, interval_length) {
   # For each sample curve, evalute them at input dose, and sort.
