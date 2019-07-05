@@ -22,19 +22,24 @@
 #' @author Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export
 
-sea <- function(dose, LET, ratios, DER, n = NULL) {
-  if (!is.null(n) && (n != length(ratios) | n != length(LET))) {
+sea <- function(dose, LET, ratios, DERs, n = NULL) {
+  if (!is.null(n) && (n != length(ratios) || n != length(LET))) {
     stop("Length of arguments do not match.")
+  } else if (length(DERs != 1 || length(DERs != length(ratios)))) {
+    return("Length of arguments do not match.")
   } else if (sum(ratios) != 1) {
     stop("Sum of ratios do not add up to one.")
-  } else if (!check_DER(DER)) {
-    stop("DER has invalid properties.")
   }
-  #  End error handling
+  for (DER in DERs) {
+    if (!check_DER(DER)) {
+      stop("DER has invalid properties.")
+    }
+  }
+  # End error handling.
   total <- 0
   i <- 0
   while (i < length(ratios)) { # Iterate over HZE ions in the mixture.
-    total <- total + DER(dose * ratios[i], LET[i])
+    total <- total + DERs[i](dose * ratios[i], LET[i])
     i <- i + 1
   }
   return(total)
