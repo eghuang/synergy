@@ -16,8 +16,7 @@
 #' @export
 
 check_DER <- function(DER) {
-  # Nonnegative when dose >= 0
-  if (sum(DER(0, 1:500) < 0) < 0) {
+  if (sum(DER(0, 1:500) < 0) < 0) { # Nonnegative when dose >= 0.
     return(FALSE)
   } else if (integrate(DER,
                        lower = 0, upper = .Machine$integer.max, LET = 1:500) !=
@@ -25,7 +24,9 @@ check_DER <- function(DER) {
                        lower = 0, upper = .Machine$integer.max, LET = 1:500)) {
     return(FALSE)
   }
-
-  # All tests pass
-  return(TRUE)
+  else if (DER(0:.Machine$integer.max, 1:500) > 1) { # Prevalence does not exceed 1.
+    return(FALSE)
+  }
+  # Numerical inverse exists.
+  return(TRUE) # All tests pass.
 }
