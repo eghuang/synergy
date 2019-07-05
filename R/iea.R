@@ -86,6 +86,17 @@ calculate_IEA <- function(dose, LET, ratios, model = "NTE",
   return(ode(c(I = 0), times = dose, dE, parms = p, method = "radau"))
 }
 
+#===============================================================================
+# New IEA function
+
+#===============================================================================
+iea <- function(dose, LET, ratios, DERs, EDRs) {
+  # dI / dd = \sum_{j = 1}^{N} r_j \cdot d E_j / d D_j(I)
+}
+
+
+
+
 #============= dI HIDDEN FUNCTIONS =============#
 .calculate_dI_nte <- function(aa, u, kk1) {
   return((aa + exp( - phi * u) * kk1 * phi) *

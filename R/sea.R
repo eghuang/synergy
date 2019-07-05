@@ -16,14 +16,13 @@
 #'         parameters.
 #'
 #' @examples
-#' calculate_SEA(.01 * 0:40, c(70, 195), c(1/2, 1/2), n = 2)
-#' calculate_SEA(.01 * 0:70, c(0.4, 195), c(4/7, 3/7))
-#' # RKS please explain n=NULL and lowLET = false a bit more. Also, what happens if we add more models in the cross validation?
+#' sea(.01 * 0:40, c(70, 195), c(1/2, 1/2), n = 2)
+#' sea(.01 * 0:70, c(0.4, 195), c(4/7, 3/7))
 #'
 #' @author Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export
 
-calculate_SEA <- function(dose, LET, ratios, DER, n = NULL) {
+sea <- function(dose, LET, ratios, DER, n = NULL) {
   if (!is.null(n) && (n != length(ratios) | n != length(LET))) {
     stop("Length of arguments do not match.")
   } else if (sum(ratios) != 1) {

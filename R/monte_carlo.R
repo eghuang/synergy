@@ -26,7 +26,7 @@
 #' @author Yimin Lin, Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export
 
-run_monte_carlo <- function(n = 200, dose, LET, ratios, model = "NTE",
+monte_carlo <- function(n = 200, dose, LET, ratios, model = "NTE",
                                  vcov = TRUE, interval_length = 0.95,
                                  seed = 100) {
   if (sum(ratios) != 1) {
