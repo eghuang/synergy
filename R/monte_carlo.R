@@ -1,16 +1,18 @@
 #' @title Runs the Monte Carlo method on a baseline no-synergy/antagonism
 #'        mixture DER.
 #'
-#' @description Need to rewrite and generalize.
+#' @description
 #'
 #' @param n Numeric integer of the number of samples to be drawn.
 #' @param dose Numeric vector of all total dose values to be evaluated.
 #' @param LET Numeric vector of all LET values, must be length n.
 #' @param ratios Numeric vector of dose proportions applied on component DERs.
-#' @param model String value corresponding to the model to be used.
+#' @param E
+#' @param models
 #' @param vcov Boolean for assessing inter-parameter correlation.
 #' @param interval_length Numeric double of the confidence interval width.
 #' @param seed Numeric value for pseudorandom generators.
+#' @param ... Optional arguments to DER functions in E.
 
 #' @details Corresponding elements of ratios, LET should be associated with the
 #'          same DER.
@@ -19,36 +21,33 @@
 #'         confidence interval for a mixture DER over an interval of doses.
 #'
 #' @examples
-#' ratios <- c(1/2, 1/2)
-#' LET_vals <- c(195, 70)
-#' run_monte_carlo(0:100, LET_vals, ratios)
 #'
 #' @author Yimin Lin, Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export
 
-monte_carlo <- function(n = 200, dose, LET, ratios, model = "NTE",
-                                 vcov = TRUE, interval_length = 0.95,
-                                 seed = 100) {
+monte_carlo <- function(dose, LET, ratios, E, models, n = 200, vcov = TRUE,
+                        interval_length = 0.95, seed = 100, ...) {
   if (sum(ratios) != 1) {
     stop("Sum of ratios do not add up to one.")
   }
   # Set the pseudorandom seed
   set.seed(seed)
   # Generate N randomly generated samples of parameters of HZE model.
-  curve_list <- .generate_samples(n, dose, LET, ratios, model, vcov)
+  curve_list <- .generate_samples(n, dose, LET, ratios, E, models, vcov, ...)
   monte_carlo_ci <- matrix(nrow = 2, ncol = length(dose))
 
   # Calculate CI for each dose point
-  for (i in 1 : length(dose)) { # EGH: Possible vectorization opportunity
+  for (i in 1:length(dose)) { # EGH: Possible vectorization opportunity
     monte_carlo_ci[, i] <- .generate_ci(n, i, curve_list, interval_length)
   }
   return(list(monte_carlo = monte_carlo_ci))
 }
 
 
-#========================= MONTE CARLO HIDDEN FUNCTIONS =======================#
+# Monte Carlo hidden functions =================================================
 
-#================== SAMPLING ===================#
+# Sampling ---------------------------------------------------------------------
+
 #' @title Generates mixture no-synergy/antagonism DER samples with
 #'        parameters drawn from a Gaussian distribution.
 #'
@@ -58,68 +57,55 @@ monte_carlo <- function(n = 200, dose, LET, ratios, model = "NTE",
 #' @param dose Numeric vector of all total dose values to be evaluated.
 #' @param LET Numeric vector of all LET values, must be length n.
 #' @param ratios Numeric vector of dose proportions applied on component DERs.
-#' @param model String value corresponding to the model to be used.
+#' @param E
+#' @param models
 #' @param vcov Boolean for assessing inter-parameter correlation.
-#' @param nte_model The input HZE nontargeted and targeted effects model.
-#' @param te_model The input HZE targeted effects only model.
-#' @param low_model The input low LET model.
+#' @param ... Optional arguments to DER functions in E.
 #'
-#' @return Numeric vector of sample mixture baseline DERs evaluated at the given doses.
+#' @return Numeric vector of sample mixture baseline DERs evaluated at the
+#'         given doses.
 
-.generate_samples <- function(n, dose, LET, ratios, model, vcov,
-                              nte_model = HZE_nte_model,
-                              te_model = HZE_te_model,
-                              low_model = low_LET_model) {
-  low_LET_samples <- rmvnorm(n, coef(low_model), vcov(low_model))
-  if (model == "NTE") {
-    ion_model <- nte_model
-    num_coef <- 3
-  } else if (model == "TE") {
-    ion_model <- te_model
-    num_coef <- 2
-  }
+.generate_samples <- function(n, dose, LET, ratios, E, models, vcov, ...) {
+  params <- list()
   if (vcov) {
-    samples <- rmvnorm(n, mean = coef(ion_model), sigma = vcov(ion_model))
-  } else {
-    samples <- mapply(rnorm, rep(n, num_coef), coef(ion_model),
-                      summary(ion_model)$coefficients[, "Std. Error"])
-  }
-  curve_list <- list(0)
-  for (i in 1:n) {
-    if (model == "NTE") {
-      curve_list[[i]] <- calculate_IEA(dose, LET, ratios,
-                                      coef = list(NTE = samples[i, ],
-                                      lowLET = low_LET_samples[i]),
-                                      model = "NTE")
-    } else if (model == "TE") {
-      curve_list[[i]] <- calculate_IEA(dose, LET, ratios,
-                                      coef = list(TE = samples[i, ],
-                                      lowLET = low_LET_samples[i]),
-                                      model = "TE")
+    for (i in 1:length(models)) {
+      params[i] <- rmvnorm(n, mean = coef(models[i]), sigma = vcov(models[i]))
     }
+  } else {
+    for (i in 1:length(models)) {
+      params[i] <- mapply(stats::rnorm, rep(n, length(coef(models[i]))),
+                          coef(models[i]),
+                          summary(models[i])$coefficients[, "Std. Error"])
+    }
+  }
+  curve_list <- list()
+  for (i in 1:n) {
+    curve_list[[i]] <- iea(dose, LET, ratios, E, coef = params[[, ]][i, ], ...)
     cat(paste("  Currently at Monte Carlo step:", toString(i), "of",
               toString(n)), sprintf('\r'))
   }
   return(curve_list)
 }
 
-#============= INTERVAL CONSTRUCTION ===========#
-#' @title Generates confidence intervals for mixture baeline DER samples
+
+# Interval construction --------------------------------------------------------
+
+#' @title Generates confidence intervals for mixture baseline DER samples
 #'              at a dose.
 #'
 #' @description
 #'
 #' @param n Numeric integer of the number of samples to be drawn.
-#' @param dose_index Numeric integer of doses
+#' @param index Numeric integer of doses
 #' @param sample_curves Numeric list of sampled mixture DER values.
 #' @param interval_length Numeric double of the confidence interval width.
 #'
 #' @return Numeric length-two vector of an upper and lower bound for the
 #'         confidence interval of a dose.
 
-.generate_ci <- function(n, dose_index, sample_curves, interval_length) {
+.generate_ci <- function(n, index, sample_curves, interval_length) {
   # For each sample curve, evalute them at input dose, and sort.
-  sample_values <- sort(sapply(sample_curves, function(x) x[, 2][dose_index]))
+  sample_values <- sort(sapply(sample_curves, function(x) x[, 2][index]))
   # Returning resulting CI
   return(c(sample_values[ceiling((1 - interval_length) / 2 * n)],
            sample_values[(interval_length + (1 - interval_length) / 2) * n]))
