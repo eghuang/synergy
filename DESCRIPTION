@@ -19,7 +19,7 @@ LazyData: true
 Depends:
     R (>= 3.5.0)
 Imports:
-    numDeriv (>= 2016.8-1)
+    numDeriv (>= 2016.8-1),
     deSolve (>= 1.21),
     minpack.lm (>= 1.2-1), 
     mvtnorm (>= 1.0-8),
