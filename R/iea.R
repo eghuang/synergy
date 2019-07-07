@@ -8,6 +8,7 @@
 #' @param E Vector of dose effect relationship functions.
 #' @param dE Optional vector of functions corresponding to the derivatives of E.
 #' @param check Optional boolean whether to check DERs in each run.
+#' @param ... Optional arguments to DER functions in E.
 #'
 #' @details Corresponding elements of ratios, LET should be associated with the
 #'          same DER.
@@ -26,7 +27,7 @@
 #' @author Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export
 
-iea <- function(dose, LET, ratios, E, dE = NULL, check = FALSE) {
+iea <- function(dose, LET, ratios, E, dE = NULL, check = FALSE, ...) {
   ll <- length(LET)
   lr <- length(ratios)
   le <- length(E)
@@ -46,18 +47,20 @@ iea <- function(dose, LET, ratios, E, dE = NULL, check = FALSE) {
     }
   }
   if (check) {
-    for (f in E) {
-      if (!check_DER(f)) {
+    for (DER in E) {
+      if (!check_DER(DER, ...)) {
         stop("DER has invalid properties.")
       }
     }
   } # End error handling.
 
+  # Add capability to cycle single DER or LET value
+
   dI <- function(t, y, parms) { # I'(d) = \sum_{j = 1}^{N} r_j * E'_j(D_j(I))
     with(as.list(c(y, parms)), { # Required syntax for ode call
       i <- 0
       for (j in 1:length(LET)) { # Loops over the summation
-        dj <- function(y) E[[j]](y, LET[j]) # Stores the LET information
+        dj <- function(y) E[[j]](y, LET[j], ...) # Stores the LET information
         if (!is.null(dE)) { # Finds numeric derivative
           slope <- function(y) dE[[j]](y, LET[j]) # Must require only one argument
         } else {
@@ -65,7 +68,6 @@ iea <- function(dose, LET, ratios, E, dE = NULL, check = FALSE) {
         }
         invrs <- .inverse(dj) # Finds numerical inverse
         i <- i + ratios[j] * slope(invrs(I)) # Increments the summation
-        print(invrs(I))
       }
       return(list(i)) # I'(d)
     })

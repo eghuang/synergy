@@ -15,12 +15,12 @@
 #' @author Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export
 
-check_DER <- function(DER, upper = 10 ^ 3, upperLET = 500) {
-  if (any(DER(0, 1:upperLET) < 0)) { # Nonnegative when dose >= 0.
+check_DER <- function(DER, upper = 10 ^ 3, upperLET = 500, ...) {
+  if (any(DER(0, 1:upperLET, ...) < 0)) { # Nonnegative when dose >= 0.
     return(FALSE)
   }
   for (i in 1:upperLET) {
-    values <- DER(0:upper, i) # Check up to upper
+    values <- DER(0:upper, i, ...) # Check up to upper
     if (any(values > 1) || any(values < 0)) { # Prevalence does not exceed 1.
       return(FALSE)
     }

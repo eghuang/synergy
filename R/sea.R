@@ -5,7 +5,8 @@
 #' @param dose Numeric vector corresponding to the sum dose in cGy.
 #' @param LET Numeric vector of all LET values, must be length n.
 #' @param ratios Numeric vector of all dose ratios, must be length n.
-#' @param DER DER function taking dose and LET as arguments.
+#' @param E Vector of DER functions taking dose and LET as arguments.
+#' @param ... Optional arguments to DER functions in E.
 #'
 #' @details Corresponding elements of ratios, LET should be associated with the
 #'          same DER.
@@ -21,27 +22,25 @@
 #' @author Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export
 
-sea <- function(dose, LET, ratios, DERs) {
+sea <- function(dose, LET, ratios, E, ...) {
   if (length(LET) != 1 && length(ratios) != 1
       && length(LET) != length(ratios)) {
     stop("Length of LET and ratio arguments do not match.")
-  } else if (length(DERs) != 1 &&
-             length(DERs) != min(length(LET), length(ratios))) {
+  } else if (length(E) != 1 &&
+             length(E) != min(length(LET), length(ratios))) {
     return("Length of DERs and components do not match.")
   } else if (sum(ratios) != 1) {
     stop("Sum of ratios do not add up to one.")
   }
-  for (DER in DERs) {
-    if (!check_DER(DER)) {
+  for (DER in E) {
+    if (!check_DER(DER, ...)) {
       stop("DER has invalid properties.")
     }
   }
   # End error handling.
   total <- 0
-  i <- 0
-  while (i < length(ratios)) { # Iterate over HZE ions in the mixture.
-    total <- total + DERs[i](dose * ratios[i], LET[i])
-    i <- i + 1
+  for (i in 1:length(ratios)) { # Iterate over HZE ions in the mixture.
+    total <- total + E[[i]](dose * ratios[i], LET[i], ...)
   }
   return(total)
 }
