@@ -25,22 +25,32 @@
 #' @author Yimin Lin, Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export
 
-monte_carlo <- function(dose, LET, ratios, E, models, n = 200, vcov = TRUE,
-                        interval_length = 0.95, seed = 100, ...) {
+monte_carlo <- function(dose, LET, ratios, E, models, dE = NULL, n = 200,
+                        vcov = TRUE, interval_length = 0.95, seed = 100,
+                        check = TRUE, ...) {
   if (sum(ratios) != 1) {
     stop("Sum of ratios do not add up to one.")
+  } else if (check) {
+    for (DER in E) {
+      if (!check_DER(DER, ...)) {
+        stop("DER has invalid properties.")
+      }
+    }
   }
-  # Set the pseudorandom seed
-  set.seed(seed)
+  if (is.numeric(seed)) {
+    set.seed(seed) # Set the pseudorandom seed
+  }
   # Generate N randomly generated samples of parameters of HZE model.
-  curve_list <- .generate_samples(n, dose, LET, ratios, E, models, vcov, ...)
-  monte_carlo_ci <- matrix(nrow = 2, ncol = length(dose))
+  curve_list <- .generate_samples(n, dose, LET, ratios, E, dE,
+                                  models, vcov, ...)
+  ci <- matrix(nrow = length(dose), ncol = 2)
 
   # Calculate CI for each dose point
   for (i in 1:length(dose)) { # EGH: Possible vectorization opportunity
-    monte_carlo_ci[, i] <- .generate_ci(n, i, curve_list, interval_length)
+    ci[i, ] <- .generate_ci(n, i, curve_list, interval_length)
   }
-  return(list(monte_carlo = monte_carlo_ci))
+  colnames(ci) <- c("bottom", "top")
+  return(data.frame(dose, ci))
 }
 
 
@@ -58,6 +68,7 @@ monte_carlo <- function(dose, LET, ratios, E, models, n = 200, vcov = TRUE,
 #' @param LET Numeric vector of all LET values, must be length n.
 #' @param ratios Numeric vector of dose proportions applied on component DERs.
 #' @param E
+#' @param dE
 #' @param models
 #' @param vcov Boolean for assessing inter-parameter correlation.
 #' @param ... Optional arguments to DER functions in E.
@@ -65,22 +76,23 @@ monte_carlo <- function(dose, LET, ratios, E, models, n = 200, vcov = TRUE,
 #' @return Numeric vector of sample mixture baseline DERs evaluated at the
 #'         given doses.
 
-.generate_samples <- function(n, dose, LET, ratios, E, models, vcov, ...) {
-  params <- list()
+.generate_samples <- function(n, dose, LET, ratios, E, dE, models, vcov, ...) {
+  params <- curve_list <- list()
   if (vcov) {
     for (i in 1:length(models)) {
-      params[i] <- rmvnorm(n, mean = coef(models[i]), sigma = vcov(models[i]))
+      params[[i]] <- mvtnorm::rmvnorm(n, mean  = coef(models[[i]]),
+                                       sigma = vcov(models[[i]]))
     }
   } else {
     for (i in 1:length(models)) {
-      params[i] <- mapply(stats::rnorm, rep(n, length(coef(models[i]))),
-                          coef(models[i]),
-                          summary(models[i])$coefficients[, "Std. Error"])
+      params[[i]] <- mapply(stats::rnorm, rep(n, length(coef(models[[i]]))),
+                             coef(models[[i]]),
+                          summary(models[[i]])$coefficients[, "Std. Error"])
     }
   }
-  curve_list <- list()
   for (i in 1:n) {
-    curve_list[[i]] <- iea(dose, LET, ratios, E, coef = params[[, ]][i, ], ...)
+    curve_list[[i]] <- iea(dose, LET, ratios, E, dE,
+                           coef = t(sapply(params, function(x) x[i, ]), ...))
     cat(paste("  Currently at Monte Carlo step:", toString(i), "of",
               toString(n)), sprintf('\r'))
   }
