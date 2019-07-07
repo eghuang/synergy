@@ -12,7 +12,8 @@
 #'
 #'
 #' @details data must have a numeric column "dose" and a numeric weight column
-#'          "NWeight".
+#'          "NWeight". If a paper uses dose in Gy care is needed in preceding
+#'          and following lines to rescale from cGy.
 #'
 #' @return Function
 #'
@@ -21,8 +22,7 @@
 #' @author Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export
 
-make_DER <- function(data, HZE, NTE, phi = 2000, y_0 = 0.046404) {
-
+make_DER <- function(data, HZE, NTE = TRUE, phi = 2000, y_0 = 0.046404) {
   # Error handling in make_model
   model <- make_model(data, HZE, NTE, phi, y_0)
   model_coef <- coef(model)
@@ -33,34 +33,30 @@ make_DER <- function(data, HZE, NTE, phi = 2000, y_0 = 0.046404) {
     DER <- function(dose, LET, alph_low = model_coef) {
       return(1 - exp( - alph_low * dose))
     }
-    # .low_LET_slope <- function(dose, LET) { # Slope dE/dd of the low LET, low Z model.
-    #   low_LET_model_coef * exp( - low_LET_model_coef * dose)
-    # }
 
   # HZE models =================================================================
   } else {
 
     if (NTE) { # HZE NTE -------------------------------------------------------
       # Calibrated hazard function.
-      calibrated_nte_hazard_func <- function(dose, LET, coef) {
+      HZE_NTE_hazard_func <- function(dose, LET, coef) {
         return(coef[1] * LET * dose * exp( - coef[2] * LET)
                + (1 - exp( - phi * dose)) * coef[3])
       }
       # Calibrated HZE NTE DER.
       DER <- function(dose, LET, coef = model_coef) {
-        return(1 - exp( - calibrated_nte_hazard_func(dose, LET, coef)))
+        return(1 - exp( - HZE_NTE_hazard_func(dose, LET, coef)))
       }
 
     } else if (!NTE) { # HZE TE ------------------------------------------------
       # Calibrated hazard function.
-      calibrated_te_hazard_func <- function(dose, LET, coef) {
+      HZE_TE_hazard_func <- function(dose, LET, coef) {
         return(coef[1] * LET * dose * exp( - coef[2] * LET))
       }
       # Calibrated HZE TE one-ion DER.
       DER <- function(dose, LET, coef = model_coef) {
-        return(1 - exp( - calibrated_te_hazard_func(dose, LET, coef)))
+        return(1 - exp( - HZE_TE_hazard_func(dose, LET, coef)))
       }
-
     }
   }
   print(summary(model, correlation = TRUE))
@@ -121,7 +117,7 @@ make_model <- function(data, HZE, NTE, phi, y_0) {
     HZE_data <- dplyr::select(filter(data, Z > 3), 1:length(data)) # Includes 1-ion data iff Z > 3
 
     if (NTE) { # HZE NTE -------------------------------------------------------
-      model <- nls(  # Calibrate params in model modifying 17Cuc. hazard function NTE models. RKS: Models include Y_0, DERs do not.
+      model <- nls(  # Calibrate params in model modifying 17Cuc. hazard function NTE models.
         Prev ~ y_0 + (1 - exp ( - (aa1 * LET * dose * exp( - aa2 * LET)
                                    + (1 - exp( - phi * dose)) * kk1))),
         data = HZE_data,
@@ -134,8 +130,6 @@ make_model <- function(data, HZE, NTE, phi, y_0) {
         data = HZE_data,
         weights = NWeight, # Must have weight column called NWeight
         start = list(aate1 = .00009, aate2 = .01))
-
-      # If a paper uses dose in Gy care is needed in preceding and following lines to rescale from cGy.
     }
   }
   return(model)
@@ -143,3 +137,15 @@ make_model <- function(data, HZE, NTE, phi, y_0) {
 
 # Hidden functions =============================================================
 
+.low_LET_slope <- function(dose, LET) { # Slope dE/dd of the low LET, low Z model.
+  low_LET_model_coef * exp( - low_LET_model_coef * dose)
+}
+
+.HZE_NTE_slope <- function(aa, u, kk1) {
+  return((aa + exp( - phi * u) * kk1 * phi) *
+           exp( - (aa * u + (1 -exp( - phi * u)) * kk1)))
+}
+
+.HZE_TE_slope <- function(aa, u, pars = NULL) {
+  return(aa * exp(- aa * u))
+}
