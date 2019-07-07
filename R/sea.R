@@ -22,7 +22,7 @@
 #' @author Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export
 
-sea <- function(dose, LET, ratios, E, ...) {
+sea <- function(dose, LET, ratios, E, coef, ...) {
   if (length(LET) != 1 && length(ratios) != 1
       && length(LET) != length(ratios)) {
     stop("Length of LET and ratio arguments do not match.")
@@ -39,8 +39,14 @@ sea <- function(dose, LET, ratios, E, ...) {
   }
   # End error handling.
   total <- 0
-  for (i in 1:length(ratios)) { # Iterate over HZE ions in the mixture.
-    total <- total + E[[i]](dose * ratios[i], LET[i], ...)
+  if (coef) {
+    for (i in 1:length(ratios)) { # Iterate over HZE ions in the mixture.
+      total <- total + E[[i]](dose * ratios[i], LET[i], coef, ...)
+    }
+  } else {
+    for (i in 1:length(ratios)) {
+      total <- total + E[[i]](dose * ratios[i], LET[i], ...)
+    }
   }
   return(total)
 }

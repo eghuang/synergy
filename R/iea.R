@@ -7,6 +7,7 @@
 #' @param ratios Numeric vector of all dose ratios, must be length n.
 #' @param E Vector of dose effect relationship functions.
 #' @param dE Optional vector of functions corresponding to the derivatives of E.
+#' @param coef
 #' @param check Optional boolean whether to check DERs in each run.
 #' @param ... Optional arguments to DER functions in E.
 #'
@@ -27,7 +28,8 @@
 #' @author Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export
 
-iea <- function(dose, LET, ratios, E, dE = NULL, check = FALSE, ...) {
+iea <- function(dose, LET, ratios, E,
+                dE = NULL, coef = NULL, check = FALSE, ...) {
   ll <- length(LET)
   lr <- length(ratios)
   le <- length(E)
@@ -60,7 +62,11 @@ iea <- function(dose, LET, ratios, E, dE = NULL, check = FALSE, ...) {
     with(as.list(c(y, parms)), { # Required syntax for ode call
       i <- 0
       for (j in 1:length(LET)) { # Loops over the summation
-        dj <- function(y) E[[j]](y, LET[j], ...) # Stores the LET information
+        if (!is.null(coef)) { # Should only be used in Monte Carlo calls
+          dj <- function(y) E[[j]](y, LET[j], coef = coef[j, ], ...)
+        } else { # Stores the LET information
+          dj <- function(y) E[[j]](y, LET[j], ...)
+        }
         if (!is.null(dE)) { # Finds numeric derivative
           slope <- function(y) dE[[j]](y, LET[j]) # Must require only one argument
         } else {
@@ -76,7 +82,8 @@ iea <- function(dose, LET, ratios, E, dE = NULL, check = FALSE, ...) {
   pars  <- c() # Setting up arguments to ode call
   yini  <- c(I = 0)
   times <- dose
-  out   <- ode(yini, times, dI, pars) # method = "adams" recommended for nonstiff
+  out   <- data.frame(ode(yini, times, dI, pars)) # "adams" method recommended for nonstiff
+  colnames(out) <- c("dose", "effect")
   return(out)
 }
 
