@@ -6,7 +6,6 @@
 #' @param LET Numeric vector of all LET values, must be length n.
 #' @param ratios Numeric vector of all dose ratios, must be length n.
 #' @param DER DER function taking dose and LET as arguments.
-#' @param n Number of DERs, optional argument used to check parameter validity.
 #'
 #' @details Corresponding elements of ratios, LET should be associated with the
 #'          same DER.
@@ -22,11 +21,13 @@
 #' @author Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export
 
-sea <- function(dose, LET, ratios, DERs, n = NULL) {
-  if (!is.null(n) && (n != length(ratios) || n != length(LET))) {
-    stop("Length of arguments do not match.")
-  } else if (length(DERs != 1 || length(DERs != length(ratios)))) {
-    return("Length of arguments do not match.")
+sea <- function(dose, LET, ratios, DERs) {
+  if (length(LET) != 1 && length(ratios) != 1
+      && length(LET) != length(ratios)) {
+    stop("Length of LET and ratio arguments do not match.")
+  } else if (length(DERs) != 1 &&
+             length(DERs) != min(length(LET), length(ratios))) {
+    return("Length of DERs and components do not match.")
   } else if (sum(ratios) != 1) {
     stop("Sum of ratios do not add up to one.")
   }
