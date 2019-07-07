@@ -21,10 +21,10 @@
 #' @author Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export
 
-make_DER <- function(data, HZE, NTE, phi = 2000, y_0 = 0.04604) {
+make_DER <- function(data, HZE, NTE, phi = 2000, y_0 = 0.046404) {
 
   # Error handling in make_model
-  model <- make_model(data, HZE, NTE, phi = 2000, y_0 = 0.04604)
+  model <- make_model(data, HZE, NTE, phi, y_0)
   model_coef <- coef(model)
 
   # Swift light ================================================================
@@ -92,7 +92,7 @@ make_DER <- function(data, HZE, NTE, phi = 2000, y_0 = 0.04604) {
 #' @author Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export
 
-make_model <- function(data, HZE, NTE, phi = 2000, y_0 = 0.04604) {
+make_model <- function(data, HZE, NTE, phi, y_0) {
   # Error handling =============================================================
   if (!is.data.frame(data)) {
     stop("Argument given for data is not a data.frame.")
