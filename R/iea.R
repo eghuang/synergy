@@ -7,7 +7,7 @@
 #' @param ratios Numeric vector of all dose ratios, must be length n.
 #' @param E Vector of dose effect relationship functions.
 #' @param dE Optional vector of functions corresponding to the derivatives of E.
-#' @param showSummary Boolean
+#' @param check Optional boolean whether to check DERs in each run.
 #'
 #' @details Corresponding elements of ratios, LET should be associated with the
 #'          same DER.
@@ -17,71 +17,15 @@
 #'         one-ion DERs parameters.
 #'
 #' @examples
+#' ion_data <- load_ion_data("one_ion.csv")
+#' HZE_nte_der <- make_DER(ion_data, TRUE, TRUE)
+#' check_DER(HZE_nte_der)
+#' # Iron and silicon two-ion mixture.
+#' iea(0:100, c(70, 30), c(1/3, 2/3), rep(c(HZE_nte_der), 2))
 #'
 #' @author Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export
 
-calculate_IEA <- function(dose, LET, ratios, model = "NTE",
-                         coef = list(NTE = HZE_nte_model_coef,
-                                     TE = HZE_te_model_coef,
-                                     lowLET = low_LET_model_coef),
-                         ders = list(NTE = calibrated_HZE_nte_der,
-                                     TE = calibrated_HZE_te_der,
-                                     lowLET = calibrated_low_LET_der),
-                         calculate_dI = c(NTE = .calculate_dI_nte,
-                                          TE = .calculate_dI_te),
-                         phi = 2000) {
-  dE <- function(yini, state, pars) { # Constructing an ODE from the DERS.
-    with(as.list(c(state, pars)), {
-
-      # Screen out low LET values.
-      lowLET_total <- lowLET_ratio <- 0
-      remove <- c()
-      for (i in 1:length(LET)) {
-        if (LET[i] <= 3) { # Ion is low-LET.
-          lowLET_total <- lowLET_total + LET[i]
-          lowLET_ratio <- lowLET_ratio + ratios[i]
-          remove <- unique(c(remove, LET[i]))
-          ratios[i] <- 0
-        }
-      }
-      LET <- c(setdiff(LET, remove))
-      ratios <- ratios[! ratios == 0]
-
-      # Begin calculating dI values.
-      aa <- u <- dI <- vector(length = length(LET))
-      if (length(LET) > 0) {
-        for (i in 1:length(LET)) {
-          aa[i] <- pars[1] * LET[i] * exp( - pars[2] * LET[i])
-          u[i] <- uniroot(function(dose) HZE_der(dose, LET[i], pars) - I,
-                          interval = c(0, 20000),
-                          extendInt = "yes",
-                          tol = 10 ^ - 10)$root
-          dI[i] <- ratios[i] * calc_dI(aa[i], u[i], pars[3])
-        }
-      }
-      if (lowLET_ratio > 0) {
-        # If low-LET DER is present then include it at the end of the dI vector. RKS: make it first as asked for above? last as asked for here? any location at all, which seems to work?
-        u[length(LET) + 1] <- uniroot(function(dose)
-          low_der(dose, LET = lowLET_total,
-                  alph_low = coef[["lowLET"]]) - I,
-          interval = c(0, 20000),
-          extendInt = "yes",
-          tol = 10 ^ - 10)$root
-        dI[length(LET) + 1] <- lowLET_ratio * low_LET_slope(u[length(LET) + 1],
-                                                            LET = lowLET_total)
-      }
-      return(list(sum(dI)))
-    })
-  }
-  p <- list(pars = coef[[model]],
-            HZE_der = ders[[model]],
-            low_der = ders[["lowLET"]],
-            calc_dI = calculate_dI[[model]])
-  return(ode(c(I = 0), times = dose, dE, parms = p, method = "radau"))
-}
-
-#===============================================================================
 iea <- function(dose, LET, ratios, E, dE = NULL, check = FALSE) {
   ll <- length(LET)
   lr <- length(ratios)
@@ -117,7 +61,7 @@ iea <- function(dose, LET, ratios, E, dE = NULL, check = FALSE) {
         if (!is.null(dE)) { # Finds numeric derivative
           slope <- function(y) dE[[j]](y, LET[j]) # Must require only one argument
         } else {
-          slope <- function(y) numDeriv::grad(dj, y) # Slope function is accurate, inflated in past scripts
+          slope <- function(y) numDeriv::grad(dj, y)
         }
         invrs <- .inverse(dj) # Finds numerical inverse
         i <- i + ratios[j] * slope(invrs(I)) # Increments the summation
@@ -135,15 +79,7 @@ iea <- function(dose, LET, ratios, E, dE = NULL, check = FALSE) {
 }
 
 
-# HIDDEN FUNCTIONS -------------------------------------------------------------
-.calculate_dI_nte <- function(aa = 0.0000830213, u, kk1 = 0.0314282300) {
-  return((aa + exp( - phi * u) * kk1 * phi) *
-           exp( - (aa * u + (1 -exp( - phi * u)) * kk1)))
-}
-
-.calculate_dI_te <- function(aa, u, pars = NULL) {
-  return(aa * exp(- aa * u))
-}
+# Hidden functions =============================================================
 
 .inverse <- function(f, lower = 10 ^ (-2), upper = 10 ^ 3) {
   function(y) uniroot(function(x) f(x) - y, lower = lower, upper = upper,
