@@ -1,29 +1,24 @@
 #' @title Applies IEA to get a baseline no-synergy/antagonism mixture DER.
 #'
-#' @description Need to rewrite and generalize.
+#' @description
 #'
 #' @param dose Numeric vector corresponding to the sum dose in cGy.
 #' @param LET Numeric vector of all LET values, must be length n.
 #' @param ratios Numeric vector of all dose ratios, must be length n.
-#' @param model String value corresponding to the model to be used, either "NTE" or "TE".
-#' @param coef Named list of numeric vectors containing coefficients for one-ion DERs.
-#' @param ders Named list of functions containing relevant one-ion DER models.
-#' @param calculate_dI Named vector of functions to calculate dI depending on
-#'                     the selected model.
-#' @param phi Numeric value, used in NTE models.
+#' @param E Vector of dose effect relationship functions.
+#' @param dE Optional vector of functions corresponding to the derivatives of E.
+#' @param showSummary Boolean
 #'
 #' @details Corresponding elements of ratios, LET should be associated with the
 #'          same DER.
 #'
-#' @return Numeric vector representing the estimated Harderian Gland
+#' @return Numeric vector representing the estimated Harderian Gland tumor
 #'         prevalence from an IEA mixture DER constructed from the given
 #'         one-ion DERs parameters.
 #'
 #' @examples
-#' calculate_IEA(.01 * 0:40, c(70, 195), c(1/2, 1/2))
-#' calculate_IEA(.01 * 0:70, c(.4, 195), c(4/7, 3/7), model = "TE")
 #'
-#' @author Dae Woong Ham, Edward Greg Huang <eghuang@@berkeley.edu>
+#' @author Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export
 
 calculate_IEA <- function(dose, LET, ratios, model = "NTE",
@@ -87,22 +82,70 @@ calculate_IEA <- function(dose, LET, ratios, model = "NTE",
 }
 
 #===============================================================================
-# New IEA function
+iea <- function(dose, LET, ratios, E, dE = NULL, check = FALSE) {
+  ll <- length(LET)
+  lr <- length(ratios)
+  le <- length(E)
+ if (ll != 1 && lr != 1 && ll != lr) {
+    stop("Length of LET and ratio arguments do not match.")
+  } else if (le != 1 && le != min(ll, lr)) {
+    return("Length of DERs and components do not match.")
+  } else if (sum(ratios) != 1) {
+    stop("Sum of ratios do not add up to one.")
+  } else if (!is.numeric(dose)) {
+    stop("Dose argument is not numeric.")
+  } else if (any(dose < 0)) {
+    stop("Dose argument has negative elements.")
+  } else if (!is.null(dE)) { # Derivative argument specified
+    if (le != length(dE)) {
+      stop("Length of DERs and derivatives do not match.")
+    }
+  }
+  if (check) {
+    for (f in E) {
+      if (!check_DER(f)) {
+        stop("DER has invalid properties.")
+      }
+    }
+  } # End error handling.
 
-#===============================================================================
-iea <- function(dose, LET, ratios, DERs, EDRs) {
-  # dI / dd = \sum_{j = 1}^{N} r_j \cdot d E_j / d D_j(I)
+  dI <- function(t, y, parms) { # I'(d) = \sum_{j = 1}^{N} r_j * E'_j(D_j(I))
+    with(as.list(c(y, parms)), { # Required syntax for ode call
+      i <- 0
+      for (j in 1:length(LET)) { # Loops over the summation
+        dj <- function(y) E[[j]](y, LET[j]) # Stores the LET information
+        if (!is.null(dE)) { # Finds numeric derivative
+          slope <- function(y) dE[[j]](y, LET[j]) # Must require only one argument
+        } else {
+          slope <- function(y) numDeriv::grad(dj, y) # Slope function is accurate, inflated in past scripts
+        }
+        invrs <- .inverse(dj) # Finds numerical inverse
+        i <- i + ratios[j] * slope(invrs(I)) # Increments the summation
+        print(invrs(I))
+      }
+      return(list(i)) # I'(d)
+    })
+  }
+
+  pars  <- c() # Setting up arguments to ode call
+  yini  <- c(I = 0)
+  times <- dose
+  out   <- ode(yini, times, dI, pars) # method = "adams" recommended for nonstiff
+  return(out)
 }
 
 
-
-
-#============= dI HIDDEN FUNCTIONS =============#
-.calculate_dI_nte <- function(aa, u, kk1) {
+# HIDDEN FUNCTIONS -------------------------------------------------------------
+.calculate_dI_nte <- function(aa = 0.0000830213, u, kk1 = 0.0314282300) {
   return((aa + exp( - phi * u) * kk1 * phi) *
            exp( - (aa * u + (1 -exp( - phi * u)) * kk1)))
 }
 
 .calculate_dI_te <- function(aa, u, pars = NULL) {
   return(aa * exp(- aa * u))
+}
+
+.inverse <- function(f, lower = 10 ^ (-2), upper = 10 ^ 3) {
+  function(y) uniroot(function(x) f(x) - y, lower = lower, upper = upper,
+                      extendInt = "yes", maxiter = 10 ^ 4)$root
 }
