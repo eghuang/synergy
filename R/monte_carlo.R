@@ -7,12 +7,13 @@
 #' @param dose Numeric vector of all total dose values to be evaluated.
 #' @param LET Numeric vector of all LET values, must be length n.
 #' @param ratios Numeric vector of dose proportions applied on component DERs.
-#' @param E
-#' @param models
+#' @param E Vector of DER functions
+#' @param models List of nls models.
 #' @param vcov Boolean for assessing inter-parameter correlation.
 #' @param interval_length Numeric double of the confidence interval width.
 #' @param seed Numeric value for pseudorandom generators.
-#' @param ... Optional arguments to DER functions in E.
+#' @param ... Optional arguments to DER functions in E. Should be constant
+#'            across all supplied E.
 
 #' @details Corresponding elements of ratios, LET should be associated with the
 #'          same DER.
@@ -80,21 +81,25 @@ monte_carlo <- function(dose, LET, ratios, E, models, dE = NULL, n = 200,
   params <- curve_list <- list()
   if (vcov) {
     for (i in 1:length(models)) {
-      params[[i]] <- mvtnorm::rmvnorm(n, mean  = coef(models[[i]]),
-                                       sigma = vcov(models[[i]]))
+      params[[i]] <- mvtnorm::rmvnorm(n, mean  = stats::coef(models[[i]]),
+                                         sigma = stats::vcov(models[[i]]))
     }
   } else {
     for (i in 1:length(models)) {
-      params[[i]] <- mapply(stats::rnorm, rep(n, length(coef(models[[i]]))),
-                             coef(models[[i]]),
-                          summary(models[[i]])$coefficients[, "Std. Error"])
+      params[[i]] <- sapply(rep(n, length(stats::coef(models[[i]]))),
+                                          stats::rnorm,
+                       mean = stats::coef(models[[i]]),
+                         sd = summary(models[[i]])$coefficients[, "Std. Error"])
     }
   }
+  start <- proc.time()
   for (i in 1:n) {
     curve_list[[i]] <- iea(dose, LET, ratios, E, dE,
-                           coef = t(sapply(params, function(x) x[i, ]), ...))
-    cat(paste("  Currently at Monte Carlo step:", toString(i), "of",
-              toString(n)), sprintf('\r'))
+                           coeff = sapply(params, function(x) x[i, ],
+                                          simplify = FALSE, ...))
+    message("Currently at Monte Carlo step: ", i, " of ", n,
+            ". Elapsed time: ", (proc.time() - start)[["elapsed"]],
+            " seconds.", rep(" ", 15), "\r", appendLF = FALSE)
   }
   return(curve_list)
 }
