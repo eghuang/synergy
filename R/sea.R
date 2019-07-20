@@ -6,6 +6,7 @@
 #' @param LET Numeric vector of all LET values, must be length n.
 #' @param ratios Numeric vector of all dose ratios, must be length n.
 #' @param E Vector of DER functions taking dose and LET as arguments.
+#' @param coeff
 #' @param ... Optional arguments to DER functions in E.
 #'
 #' @details Corresponding elements of ratios, LET should be associated with the
@@ -22,7 +23,7 @@
 #' @author Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export
 
-sea <- function(dose, LET, ratios, E, coef, ...) {
+sea <- function(dose, LET, ratios, E, coeff, ...) {
   if (length(LET) != 1 && length(ratios) != 1
       && length(LET) != length(ratios)) {
     stop("Length of LET and ratio arguments do not match.")
@@ -39,9 +40,9 @@ sea <- function(dose, LET, ratios, E, coef, ...) {
   }
   # End error handling.
   total <- 0
-  if (coef) {
+  if (coeff) {
     for (i in 1:length(ratios)) { # Iterate over HZE ions in the mixture.
-      total <- total + E[[i]](dose * ratios[i], LET[i], coef, ...)
+      total <- total + E[[i]](dose * ratios[i], LET[i], coeff, ...)
     }
   } else {
     for (i in 1:length(ratios)) {
