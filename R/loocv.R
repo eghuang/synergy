@@ -32,15 +32,15 @@
 #'                  Fe_600, Fe_350, Nb_600, La_593)
 #' actual_prev <- HZE_data$Prev
 #'
-#' NTE_cv <- cross_val(set_list,"NTE", HZE_data$Prev, HZE_data$NWeight)
-#' TE_cv <- cross_val(set_list, "TE", HZE_data$Prev, HZE_data$NWeight)
+#' NTE_cv <- loocv(set_list,"NTE", HZE_data$Prev, HZE_data$NWeight)
+#' TE_cv <- loocv(set_list, "TE", HZE_data$Prev, HZE_data$NWeight)
 #' cv_table <- cbind(NTE_cv, TE_cv)
 #' cv_table
 #'
 #' @author Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export
 
-loo_cv <- function(ions, prev, wgts, model = c("NTE", "TE"),
+loocv <- function(ions, prev, wgts, model = c("NTE", "TE"),
                       y_0 = 0.046404, phi = 2000) { # Leave one out
   pred <- c()
   for (i in 1:length(ions)) {
