@@ -15,7 +15,7 @@
 #' @author Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export
 
-check_DER <- function(DER, upper = 10 ^ 3, upperLET = 500, coeff = NULL, ...) {
+check_der <- function(DER, upper = 10 ^ 3, upperLET = 500, coeff = NULL, ...) {
   if (!is.null(coeff)) {
     if (any(DER(0, 1:upperLET, coeff, ...) < 0)) { # Nonnegative when dose >= 0.
       return(FALSE)

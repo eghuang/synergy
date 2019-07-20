@@ -22,7 +22,7 @@
 #' @author Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export
 
-make_DER <- function(data, HZE, NTE = TRUE, phi = 2000, y_0 = 0.046404) {
+make_der <- function(data, HZE, NTE = TRUE, phi = 2000, y_0 = 0.046404) {
   # Error handling in make_model
   model      <- make_model(data, HZE, NTE, phi, y_0)
   model_coef <- coef(model)
