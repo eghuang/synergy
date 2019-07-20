@@ -2,9 +2,9 @@
 
 export(iea)
 export(sea)
-export(check_DER)
+export(check_der)
 export(loocv)
 export(load_ion_data)
-export(make_DER)
+export(make_der)
 export(make_model)
-export(monte_carlo)
+export(mc)

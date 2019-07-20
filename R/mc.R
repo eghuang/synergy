@@ -26,14 +26,13 @@
 #' @author Yimin Lin, Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export
 
-monte_carlo <- function(dose, LET, ratios, E, models, dE = NULL, n = 200,
-                        vcov = TRUE, interval_length = 0.95, seed = 100,
-                        check = TRUE, ...) {
+mc <- function(dose, LET, ratios, E, models, dE = NULL, n = 200, vcov = TRUE,
+               interval_length = 0.95, seed = 100, check = TRUE, ...) {
   if (sum(ratios) != 1) {
     stop("Sum of ratios do not add up to one.")
   } else if (check) {
     for (DER in E) {
-      if (!check_DER(DER, ...)) {
+      if (!check_der(DER, ...)) {
         stop("DER has invalid properties.")
       }
     }
@@ -99,7 +98,7 @@ monte_carlo <- function(dose, LET, ratios, E, models, dE = NULL, n = 200,
       { # Prints step information
         out <- iea(dose, LET, ratios, E, dE,
                    coeff = sapply(params, function(x) x[i, ],
-                   simplify = FALSE, ...))
+                   simplify = FALSE, check = FALSE, ...))
         curve_list[[length(curve_list) + 1]] <- out # Appends successful results
         message("Currently at Monte Carlo step: ", i, " of ", n,
                 ". Elapsed time: ", (proc.time() - start)[["elapsed"]],
@@ -119,8 +118,7 @@ monte_carlo <- function(dose, LET, ratios, E, models, dE = NULL, n = 200,
         message("\n", cond) # Prints original warning message
         return(0) # Increments by zero
       },
-      finally = {
-      }
+      finally = { }
     )
     fail_count <- fail_count + result # Applies the increment
   }
