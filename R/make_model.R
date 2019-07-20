@@ -35,34 +35,33 @@ make_model <- function(data, HZE, NTE = TRUE, phi = 2000, y_0 = 0.046404) {
     stop("Argument given for y_0 is not numeric.")
   }
   # Swift light ================================================================
-  if (!HZE) {
-    # Swift light ions: here protons and alpha particles.
-    low_LET_data <- dplyr::select(filter(data, Z < 4), 1:length(data))
+  if (!HZE) { # Swift light ions: here protons and alpha particles.
+    low_LET_data <- dplyr::select(dplyr::filter(data, Z < 4), 1:length(data))
 
-    model <- nls(
+    model <- stats::nls(
       Prev ~ y_0 + 1 - exp( - alpha_low * dose), # alpha is used throughout radioiology for dose coefficients.
-      data = low_LET_data,
+      data    = low_LET_data,
       weights = NWeight, # Must have weight column called NWeight
-      start = list(alpha_low = .005))
+      start   = list(alpha_low = .005))
 
   # HZE models =================================================================
   } else {
-    HZE_data <- dplyr::select(filter(data, Z > 3), 1:length(data)) # Includes 1-ion data iff Z > 3
+    HZE_data <- dplyr::select(dplyr::filter(data, Z > 3), 1:length(data)) # Includes 1-ion data iff Z > 3
 
     if (NTE) { # HZE NTE -------------------------------------------------------
-      model <- nls(  # Calibrate params in model modifying 17Cuc. hazard function NTE models.
+      model <- stats::nls(  # Calibrate params in model modifying 17Cuc. hazard function NTE models.
         Prev ~ y_0 + (1 - exp ( - (aa1 * LET * dose * exp( - aa2 * LET)
                                    + (1 - exp( - phi * dose)) * kk1))),
-        data = HZE_data,
+        data    = HZE_data,
         weights = NWeight, # Must have weight column called NWeight
-        start = list(aa1 = .00009, aa2 = .001, kk1 = .06))
+        start   = list(aa1 = .00009, aa2 = .001, kk1 = .06))
 
     } else if (!NTE) { # HZE TE ------------------------------------------------
-      model <- nls( # Calibrating parameters in a TE only model.
+      model <- stats::nls( # Calibrating parameters in a TE only model.
         Prev ~ y_0 + (1 - exp ( - (aate1 * LET * dose * exp( - aate2 * LET)))),
-        data = HZE_data,
+        data    = HZE_data,
         weights = NWeight, # Must have weight column called NWeight
-        start = list(aate1 = .00009, aate2 = .01))
+        start   = list(aate1 = .00009, aate2 = .01))
     }
   }
   return(model)
