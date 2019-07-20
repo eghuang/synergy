@@ -3,7 +3,7 @@
 export(iea)
 export(sea)
 export(check_DER)
-export(cross_val)
+export(loocv)
 export(load_ion_data)
 export(make_DER)
 export(make_model)
