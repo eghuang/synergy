@@ -21,7 +21,6 @@ Depends:
 Imports:
     numDeriv (>= 2016.8-1),
     deSolve (>= 1.21),
-    minpack.lm (>= 1.2-1), 
     mvtnorm (>= 1.0-8),
     dplyr (>= 0.7.8)
 Suggests:
