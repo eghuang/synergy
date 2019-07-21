@@ -17,6 +17,11 @@
 #' @return nls model
 #'
 #' @examples
+#' ion_data <- load_ion_data("one_ion.csv")
+#'
+#' LLET_model    <- make_model(ion_data, FALSE)
+#' HZE_nte_model <- make_model(ion_data, TRUE, TRUE)
+#' HZE_te_model  <- make_model(ion_data, TRUE, FALSE)
 #'
 #' @author Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export

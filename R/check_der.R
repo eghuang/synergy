@@ -11,6 +11,9 @@
 #' @return Boolean.
 #'
 #' @examples
+#' ion_data <- load_ion_data("one_ion.csv")
+#' HZE_nte_der <- make_der(ion_data, TRUE, TRUE)
+#' check_der(HZE_nte_der)
 #'
 #' @author Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export

@@ -23,6 +23,14 @@
 #'
 #' @examples
 #'
+#' ion_data <- load_ion_data("one_ion.csv")
+#' HZE_nte_der <- make_der(ion_data, TRUE, TRUE)
+#' check_der(HZE_nte_der)
+#' # Iron and silicon two-ion mixture.
+#' mc(dose = 0:100, LET = c(193, 70), ratios = c(1/3, 2/3),
+#'    E = rep(c(HZE_nte_der), 2),
+#'    models = rep(list(HZE_nte_model), 2), n = 20, vcov = TRUE)
+#'
 #' @author Yimin Lin, Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export
 
@@ -98,7 +106,7 @@ mc <- function(dose, LET, ratios, E, models, dE = NULL, n = 200, vcov = TRUE,
       { # Prints step information
         out <- iea(dose, LET, ratios, E, dE,
                    coeff = sapply(params, function(x) x[i, ],
-                   simplify = FALSE, check = FALSE, ...))
+                   simplify = FALSE), check = FALSE, ...)
         curve_list[[length(curve_list) + 1]] <- out # Appends successful results
         message("Currently at Monte Carlo step: ", i, " of ", n,
                 ". Elapsed time: ", (proc.time() - start)[["elapsed"]],

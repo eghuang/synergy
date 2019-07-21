@@ -18,6 +18,11 @@
 #' @return Function
 #'
 #' @examples
+#' ion_data <- load_ion_data("one_ion.csv")
+#'
+#' LLET_der    <- make_der(ion_data, FALSE)
+#' HZE_nte_der <- make_der(ion_data, TRUE, TRUE)
+#' HZE_te_der  <- make_der(ion_data, TRUE, FALSE)
 #'
 #' @author Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export
