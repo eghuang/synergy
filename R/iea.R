@@ -7,7 +7,7 @@
 #' @param ratios Numeric vector of all dose ratios, must be length n.
 #' @param E Vector of dose effect relationship functions.
 #' @param dE Optional vector of functions corresponding to the derivatives of E.
-#' @param coef
+#' @param coeff
 #' @param check Optional boolean whether to check DERs in each run.
 #' @param ... Optional arguments to DER functions in E.
 #'
@@ -20,8 +20,8 @@
 #'
 #' @examples
 #' ion_data <- load_ion_data("one_ion.csv")
-#' HZE_nte_der <- make_DER(ion_data, TRUE, TRUE)
-#' check_DER(HZE_nte_der)
+#' HZE_nte_der <- make_der(ion_data, TRUE, TRUE)
+#' check_der(HZE_nte_der)
 #' # Iron and silicon two-ion mixture.
 #' iea(0:100, c(70, 30), c(1/3, 2/3), rep(c(HZE_nte_der), 2))
 #'
@@ -29,7 +29,7 @@
 #' @export
 
 iea <- function(dose, LET, ratios, E,
-                dE = NULL, coef = NULL, check = FALSE, ...) {
+                dE = NULL, coeff = NULL, check = FALSE, ...) {
   ll <- length(LET)
   lr <- length(ratios)
   le <- length(E)
@@ -50,30 +50,40 @@ iea <- function(dose, LET, ratios, E,
   }
   if (check) {
     for (DER in E) {
-      if (!check_DER(DER, ...)) {
+      if (!check_der(DER, ...)) {
         stop("DER has invalid properties.")
       }
     }
   } # End error handling.
 
+  # Set up
+  D <- list()
+  for (m in 1:length(E)) {
+    if (!is.null(coeff)) { # Should only be used in Monte Carlo calls
+      D[[m]] <- function(y) E[[m]](y, LET[m], coeff = coeff[[m]], ...)
+    } else { # Stores the LET information
+      D[[m]] <- function(y) E[[m]](y, LET[m], ...)
+    }
+
+  }
+  if (is.null(dE)) { # Finds numeric derivative
+    dE <- list()
+    for (k in 1:length(E)) {
+      dE[[k]] <- function(y) numDeriv::grad(D[[k]], y)
+    }
+  }
+  H <- list()
+  for (n in 1:length(E)) {
+    H[[n]] <- .inverse(D[[n]]) # Finds numerical inverse
+  }
   # Add capability to cycle single DER or LET value
 
   dI <- function(t, y, parms) { # I'(d) = \sum_{j = 1}^{N} r_j * E'_j(D_j(I))
     with(as.list(c(y, parms)), { # Required syntax for ode call
       i <- 0
       for (j in 1:length(LET)) { # Loops over the summation
-        if (!is.null(coef)) { # Should only be used in Monte Carlo calls
-          dj <- function(y) E[[j]](y, LET[j], coef = coef[j, ], ...)
-        } else { # Stores the LET information
-          dj <- function(y) E[[j]](y, LET[j], ...)
-        }
-        if (!is.null(dE)) { # Finds numeric derivative
-          slope <- function(y) dE[[j]](y, LET[j]) # Must require only one argument
-        } else {
-          slope <- function(y) numDeriv::grad(dj, y)
-        }
-        invrs <- .inverse(dj) # Finds numerical inverse
-        i <- i + ratios[j] * slope(invrs(I)) # Increments the summation
+        slope <- function(y) dE[[j]](y) # Must require only one argument
+        i <- i + ratios[j] * slope(H[[j]](I)) # Increments the summation
       }
       return(list(i)) # I'(d)
     })
@@ -82,7 +92,7 @@ iea <- function(dose, LET, ratios, E,
   pars  <- c() # Setting up arguments to ode call
   yini  <- c(I = 0)
   times <- dose
-  out   <- data.frame(ode(yini, times, dI, pars)) # "adams" method recommended for nonstiff
+  out   <- data.frame(deSolve::ode(yini, times, dI, pars, method = "bdf_d")) # "adams" method recommended for nonstiff
   colnames(out) <- c("dose", "effect")
   return(out)
 }
@@ -90,7 +100,7 @@ iea <- function(dose, LET, ratios, E,
 
 # Hidden functions =============================================================
 
-.inverse <- function(f, lower = 10 ^ (-2), upper = 10 ^ 3) {
-  function(y) uniroot(function(x) f(x) - y, lower = lower, upper = upper,
-                      extendInt = "yes", maxiter = 10 ^ 4)$root
+.inverse <- function(f, lower = 10 ^ (-2), upper = 10 ^ 4) {
+  function(y) stats::uniroot(function(x) f(x) - y, lower = lower, upper = upper,
+                             extendInt = "yes", maxiter = 10 ^ 4)$root
 }
