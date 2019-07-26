@@ -23,7 +23,7 @@
 #' HZE_nte_der <- make_der(ion_data, TRUE, TRUE)
 #' check_der(HZE_nte_der)
 #' # Iron and silicon two-ion mixture.
-#' iea(0:100, c(70, 30), c(1/3, 2/3), rep(c(HZE_nte_der), 2))
+#' iea(0:100, c(193, 30), c(1/3, 2/3), rep(c(HZE_nte_der), 2))
 #'
 #' @author Edward Greg Huang <eghuang@@berkeley.edu>
 #' @export
@@ -58,32 +58,41 @@ iea <- function(dose, LET, ratios, E,
 
   # Set up
   D <- list()
-  for (m in 1:length(E)) {
+  for (m in (1:length(E))) {
     if (!is.null(coeff)) { # Should only be used in Monte Carlo calls
-      D[[m]] <- function(y) E[[m]](y, LET[m], coeff = coeff[[m]], ...)
+      D[[m]] <- function(y) return(E[[m]](y, LET[m], coeff = coeff[[m]], ...))
     } else { # Stores the LET information
-      D[[m]] <- function(y) E[[m]](y, LET[m], ...)
+      D[[m]] <- local({
+        mu <- m
+        function(y) return(E[[mu]](y, LET[mu], ...))
+        })
     }
-
   }
   if (is.null(dE)) { # Finds numeric derivative
     dE <- list()
     for (k in 1:length(E)) {
-      dE[[k]] <- function(y) numDeriv::grad(D[[k]], y)
+      dE[[k]] <- local({
+        mu <- k
+        function(y) numDeriv::grad(D[[mu]], y)
+      })
     }
   }
+
   H <- list()
   for (n in 1:length(E)) {
-    H[[n]] <- .inverse(D[[n]]) # Finds numerical inverse
+    H[[n]] <- local({
+      mu <- n
+      .inverse(D[[mu]]) # Finds numerical inverse
+    })
   }
+
   # Add capability to cycle single DER or LET value
 
-  dI <- function(t, y, parms) { # I'(d) = \sum_{j = 1}^{N} r_j * E'_j(D_j(I))
+  dI <- function(t, y, parms) { # I'(d) = \sum_{j = 1}^{N} r_j * E'_j(E^-1_j(I))
     with(as.list(c(y, parms)), { # Required syntax for ode call
       i <- 0
       for (j in 1:length(LET)) { # Loops over the summation
-        slope <- function(y) dE[[j]](y) # Must require only one argument
-        i <- i + ratios[j] * slope(H[[j]](I)) # Increments the summation
+        i <- i + ratios[j] * dE[[j]](H[[j]](I)) # Increments the summation
       }
       return(list(i)) # I'(d)
     })
@@ -92,7 +101,7 @@ iea <- function(dose, LET, ratios, E,
   pars  <- c() # Setting up arguments to ode call
   yini  <- c(I = 0)
   times <- dose
-  out   <- data.frame(deSolve::ode(yini, times, dI, pars, method = "bdf_d")) # "adams" method recommended for nonstiff
+  out   <- data.frame(deSolve::ode(yini, times, dI, pars)) # "adams" method recommended for nonstiff
   colnames(out) <- c("dose", "effect")
   return(out)
 }
@@ -100,7 +109,8 @@ iea <- function(dose, LET, ratios, E,
 
 # Hidden functions =============================================================
 
-.inverse <- function(f, lower = 10 ^ (-2), upper = 10 ^ 4) {
+.inverse <- function(f, lower = 10 ^ (-2), upper = 2 * 10 ^ 4) {
   function(y) stats::uniroot(function(x) f(x) - y, lower = lower, upper = upper,
-                             extendInt = "yes", maxiter = 10 ^ 4)$root
+                             extendInt = "yes", tol = 10^ (-10),
+                             maxiter = 10 ^ 4)$root
 }

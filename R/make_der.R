@@ -75,11 +75,18 @@ make_der <- function(data, HZE, NTE = TRUE, phi = 2000, y_0 = 0.046404) {
   return(low_LET_model_coef * exp( - low_LET_model_coef * dose))
 }
 
-.HZE_NTE_slope <- function(aa, u, kk1) {
-  return((aa + exp( - phi * u) * kk1 * phi) *
-          exp( - (aa * u + (1 -exp( - phi * u)) * kk1)))
+.HZE_NTE_slope <- function(dose, LET, alpha = 0.0000830213,
+                                      beta = 0.0035474792,
+                                      eta = 0.0314282300,
+                                      phi = 2000) {
+  return(
+    (alpha * LET * exp(- beta * LET) + phi *
+       eta * exp(- phi * dose)) *
+         exp(- alpha * dose * LET * exp(- beta * LET) -
+             eta * (1 - exp(- dose * phi)))
+  )
 }
 
-.HZE_TE_slope <- function(aa, u, pars = NULL) {
-  return(aa * exp(- aa * u))
+.HZE_TE_slope <- function(dose, aa, pars = NULL) {
+  return(aa * exp(- aa * dose))
 }
