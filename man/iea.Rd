@@ -39,7 +39,7 @@ ion_data <- load_ion_data("one_ion.csv")
 HZE_nte_der <- make_der(ion_data, TRUE, TRUE)
 check_der(HZE_nte_der)
 # Iron and silicon two-ion mixture.
-iea(0:100, c(70, 30), c(1/3, 2/3), rep(c(HZE_nte_der), 2))
+iea(0:100, c(193, 30), c(1/3, 2/3), rep(c(HZE_nte_der), 2))
 
 }
 \author{
