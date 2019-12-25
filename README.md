@@ -2,9 +2,10 @@
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.en.html)  
 
-CRAN package prototype for synergy theory methods. Previously used for analyzing ionizing radiation tumorigenesis and chromosome aberrations outside low-earth orbit, but may be applicable to other uses. The methods found in this repository are described in [Huang et al., (2019)](https://link.springer.com/article/10.1007%2Fs00411-018-00774-x) and [Ham et al., (2018)](https://www.rrjournal.org/doi/full/10.1667/RR14948.1).
+Synergy is a R CRAN package prototype for synergy theory methods. Synergy theory is concerned with estimating a baseline dose-effect relationship (DER) aka [dose-response relationships](https://en.wikipedia.org/wiki/Dose%E2%80%93response_relationship) without synergistic or antagonistic effects for a chosen combination of DERs and doses. This package implements incremental effect addivity (IEA), a recently developed synergy theory that offers advantages over those previously used. 
 
-Run `devtools::install_github("eghuang/synergy")` to install.
+## Installation
+Run `devtools::install_github("eghuang/synergy")`.
 
 ## Repository contents
 
@@ -26,17 +27,21 @@ Function documentation.
     #                detailed in that license no warranty, explicit or implied,
     #                comes with this suite of R scripts.
     # Package name:  synergy
-    # Purpose:       Concerns radiogenic mouse Harderian gland (HG) tumorigenesis. Loads
-    #                ion and tumor prevalence data from CSV files and models tumor
-    #                prevalence using the Incremental Effect Additivity model. Additional
-    #                functions are provided to support custom dose-effect relationships 
-    #                and create confidence intervals for prevalence estimates.
-    # Contact:       Rainer K. Sachs
+    # Purpose:       Concerns radiogenic mouse Harderian gland (HG) tumorigenesis but 
+    #                can be adapted for other uses. Loads ion and tumor prevalence data
+    #                from CSV files and models tumor prevalence using the 
+    #                Incremental Effect Additivity model. Additional functions are 
+    #                provided to support custom dose-effect relationships and create 
+    #                confidence intervals for prevalence estimates.
+    # Contact:       Edward Greg Huang
     # Website:       https://github.com/eghuang/synergy
-    # Mod history:   06 Jun 2019
+    # Mod history:   24 Dec 2019
     # Attribution:   This R script was developed at UC Berkeley. Authors and contributors
     #                include Edward Greg Huang, Dae Woong Ham, Yimin Lin, Mark Ebert,
     #                Yunzhi Zhang and Ray Sachs 2017-2019.
+
+## Additional background
+The algorithms in Synergy were developed and used for modeling cancer risk for astronauts on Mars missions or other extended voyages above low earth orbit. In particular, IEA was introduced in [Siranart et al. 2016](https://www.rrjournal.org/doi/full/10.1667/RR14411.1) and [Ham et al., (2018)](https://www.rrjournal.org/doi/full/10.1667/RR14948.1). More details on synergy theory and the application of IEA in radiation research can be found in [Huang et al., (2019)](https://link.springer.com/article/10.1007%2Fs00411-018-00774-x). Other results from applying IEA synergy theory to experimental results in NASA radiobiology is expected to be published in 2020.
 
 ## Relevant references and abbreviations:
 
